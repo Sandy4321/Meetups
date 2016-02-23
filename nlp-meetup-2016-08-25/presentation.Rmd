@@ -1,0 +1,490 @@
+---
+title: "Modern ML for NLP: Large Scale Techniques for Shallow and Deep Learning"
+
+subtitle: "NLP Meetup"
+author: "Dan Pressel"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  ioslides_presentation:
+    widescreen: yes
+    incremental: no
+    smaller: true
+---
+
+
+## Overview (Part I)
+  - Background
+  - Classification/regression in an average loss framework using
+    - Stochastic Gradient Descent (SGD)
+    - Loss functions
+    - Feature Hashing/Word Embeddings
+    - Optimizations for sparse features
+    - Out-of-core processing
+  - Improving our model with generative features
+
+## Overview (Part II)
+  
+  - Refitting our framework for deep learning
+    - Dense Representations
+    - Multiclass learning
+  - Fully Connected Layers
+  - Convolutional Layers
+  - Max Over Time, K-Max
+  - Fine tuning embeddings
+
+
+## Background (Part I)
+
+  - What if we want to process BIG datasets
+    - Sets might not fit in memory
+    - Often, for NLP, with classifiers like logistic regression and linear SVMs
+
+  - Want to do it efficiently
+    - Dont load whole batch into memory
+  
+  - Ideally, learning approach that doesnt scale in time with the training set size 
+  
+  - Additionally remember that in NLP, tend to have lots of sparse features
+    - Would like to optimize as well for this
+
+## Sources
+
+  - This talk borrows most of its content from work of 
+    - Leon Bottou
+    - Ronan Collobert
+    - Yann LeCun
+    - John Langford
+
+## Some Basic Definitions - Machine Learning
+
+  - What is Machine Learning?
+    - Me: _"Learn from training data to predict future outcomes given input parameters"_
+    
+    - Ronan Collobert: _"Machine Learning aims to minimize the expected risk (generalization error) using only the information of the training set"_
+      - _"We are seeking a function f in a set of functions F which minimizes the cost function *Q* over *Z*"_
+      $$R: f \in \mathcal{F} \longmapsto E(Q(z,f)) = \int_Z Q(z, f) P(z) dz$$
+
+    - But, cannot simply minimize with optimization, as distribution *_P_* is unknown -- instead minimize empirical risk (average loss) over training set
+  
+      $$R_L: f \in \mathcal{F} \longmapsto E_N(f) = \frac{1}{N} \sum_{n=0}^{N} Q(z_n, f)$$
+
+  - As training data increases, empirical risk converges to expected risk!
+    - Weak law of large numbers!
+    - Also, as long as *VC dim* is finite, the minimium of the empirical risk converges to the minimum of the expected risk!
+
+## Some Basic Definitions - Data
+
+  - Feature Vector?  *_x_*
+    - Chosen parameters to the function we are building, a fixed vector of dimension _D_
+
+  - Label/predicted value  *_f(x)_*
+    - What we want to predict
+      - Continous predictors are regression models, discrete are classifiers
+      - During training, known labels seen with features, so that we can learn
+
+  - Training example
+  $$z_i = (x_i, y_i) \in X \times Y$$
+
+  - Training data, of length *_N_*:
+  $$\{z_1, z_2, ..., z_N\}$$
+  
+  - Loss function
+    - Price paid for inaccuracy of predictions
+  $$Q(z_n, f)$$
+
+## More about loss functions
+
+- Our Risk Minimization Framework requires us to define a cost or loss function *_Q_*
+  
+  - Square (L2) _Common for linear regression_
+  $$[f(x) - y]^2$$
+      
+  - Log (Logistic) _Common for classification_
+  $$log(1 + e^{-yf(x)})$$
+      
+  - Hinge (SVM with slack) _Common for classification_
+    - Even though this is non-differentiable at 0, can use sub-gradient!
+  $$max(0, 1 - y f(x))$$
+    
+
+## So how do we learn it?
+
+- One simple way, works on almost all functions is Gradient Descent
+  - Randomly guess starting point
+  - Iterative
+    - Take steps proportional to negative of gradient of the function at the current point
+
+$$w^{(i+1)} = w^{(i)} - \eta \nabla Q(y, f(x))$$
+$$w^{(i+1)} = w^{(i)} - \eta \sum_{n=1}^{N} \nabla Q(y_n, f(x))$$
+
+$$w_j^{(i+1)} = w_j^{(i)} - \eta \sum_{n=1}^{N} \frac{\partial{Q}}{\partial{f(x)}}\frac{\partial{f(x)}}{\partial w_j^{(i)}} Q(y_n, f(x))$$
+
+## Stochastic Gradient Descent
+
+  - A problem with GD is that it must see the entire "batch" *_N_* before it makes a parameter update
+    - This means that its a function of *_N_* and of *_D_* for a parameter update
+      - Not scalable to large datasets!
+
+  - What if instead of updating per batch, we updated per training example?
+    - Approximate gradient with single random example
+    - Parameter update is a function of *_D_* now only.
+    - There could be local noise, which could throw off the approximation, but
+    - in practice, works extremely well, tends to learn more stuff faster
+
+  $$w^{(t+1)} = w^{(t)} - \eta \nabla Q(y_t, f(x_t))$$
+
+## Concrete example with L2 loss:
+
+  - Loss function
+  $$Q = \frac{1}{2} (f_w(x) - y)^2$$
+  - Derivative of loss with respect to params (chain rule)
+  $$(f_w(x) - y) \frac{\partial}{\partial w_j}(f_w(x) - y)$$
+  $$(f_w(x) - y) \frac{\partial}{\partial w_j} \sum_{d=0}^{D} w_d x_d - y$$
+- Finally wrt parameter _j_, we get a simple update
+  $$(f_w(x) - y) x_j$$
+
+- Use chain rule to make cost derivative modular
+  - Note that first part of function is just the derivative of loss function WRT *_f(x)_*
+  
+## SGD with L2 regularization
+
+$$E_n(w) = \frac{\lambda}{2} ||w||^2 + \frac{1}{N} \sum_{t=1}^{N} Q(y_t, f(x_t))$$
+
+- Derivative
+
+$$w^{(t+1)} = w^{(t)} - \eta_t \lambda w^{(t)} - \eta_t x_t \frac{\partial{Q}}{\partial{f(x)}} Q(y_t, f(x_t))$$
+
+- Reduces to
+
+$$w^{(t+1)} = (1 - \eta_t \lambda) w^{(t)} - \eta_t x_t \frac{\partial{Q}}{\partial{f(x)}} Q(y_t, f(x_t))$$
+
+## Code for Loss function
+
+```{c eval=FALSE}
+public class SquaredLoss implements Loss
+{
+    @Override
+    public double loss(double p, double y)
+    {
+        double d = p - y;
+        return 0.5 * d * d;
+    }
+
+    @Override
+    public double dLoss(double p, double y)
+    {
+        return (p - y);
+    }
+}
+```
+
+## Code for SGD
+
+```{c eval=FALSE}
+/**
+ *  Do simple stochastic gradient descent update step
+ *  @param vectorN Feature vector with label
+ *  @param eta Learning rate (step size)
+ *  @param lambda regularization param
+ *  @param dLoss loss WRT f(x): dLoss = lossFunction.dLoss(fx, y);
+ */
+public void updateWeights(VectorN vectorN, double eta, double lambda, double dLoss, double y)
+{
+    ArrayDouble x = ((DenseVectorN) vectorN).getX();
+    weights.scale(1 - eta * lambda);
+        
+    for (int i = 0, sz = x.size(); i < sz; ++i)
+    {
+        weights.addi(i, -eta * dLoss * x.get(i));
+    }
+    wbias += -eta * BIAS_LR_SCALE * dLoss;
+}
+```
+
+## A Note about learning rates
+
+  - We often want to slow down the learning rate over time.  This prevents overshooting as we get closer
+    - step size too big: optimization diverges
+    - step size too small: optimization slow, can get stuck in local minima
+
+  - Progressive Decay
+    - initial learning rate
+    $$\eta = \eta_0$$
+    - decay
+    $$\eta_d$$
+    - at each iteration t:
+    $$\eta(t) = \frac{\eta0}{1 + s * \eta_d}$$
+
+## Example code with Progressive Decay
+
+```{c eval=FALSE}
+public class RobbinsMonroUpdateSchedule implements LearningRateSchedule
+{
+    long numSeenTotal;
+    double eta0;
+    double lambda;
+
+    @Override
+    public void reset(double eta0, double lambda)
+    {
+        this.lambda = lambda;
+        this.eta0 = eta0;
+        numSeenTotal = 0;
+    }
+    
+    @Override
+    public double update()
+    {
+        double eta = eta0 / (1 + lambda * eta0 * numSeenTotal);
+        ++numSeenTotal;
+        return eta;
+    }
+```
+
+## SGD Training on single example
+
+```{c eval=FALSE}
+/**
+ * Binary trainer for single SGD example.  Update the
+ * learning rate schedule, find derivative of loss WRT f(x),
+ * pass to updateWeights() to make SGD update
+ * @param model Our model
+ * @param fv Our feature vector example with label and x vector
+ */
+public final void trainOne(Model model, FeatureVector fv)
+{
+    WeightModel weightModel = (WeightModel)model;
+    double eta = learningRateSchedule.update();
+    double y = fv.getY();
+    double fx = weightModel.predict(fv);
+    double dLoss = lossFunction.dLoss(fx, y);
+    weightModel.updateWeights(fv.getX(), eta, lambda, dLoss, y);
+}
+```
+
+## Memory efficient online out-of-core processing
+
+  - One problem with many machine learning libraries is that they require the whole problem in working memory
+  - With SGD, easy to avoid, and we dont want since datasets presumably large
+  - Could read a line at a time from a file in sequence
+    - But, File IO interrupts processing in single thread version
+    - Also, loading file IO on large datasets can actually become the bottleneck!  
+  - Instead, could use a fixed size circular buffer to feed the SGD from memory, and use another thread to feed that queue
+    - Vowpal Wabbit uses this technique
+
+![Circular Buffer](figure/circ-buf.jpg)
+
+## More Details on Circular Buffer
+
+  - File IO thread
+     - Reads the data from file
+     - Inserts data to ring buffer
+     - Also caches data to binary version of training set
+     - Signals the processor thread at ends of epochs
+     - Re-reads the data from cache on subsequent epochs
+
+  - Processor (consumer) thread reads example from the circular buffer and processes it
+  
+  - Relatively easy, but in practice, kind of painful
+
+## A Few Details in Implementation in Java
+
+  - Java has a nice ring buffer library called *Disruptor*
+    - https://github.com/LMAX-Exchange/disruptor
+    - To utilize, we need to overload a class called EventHandler, and a MessageEvent
+
+  - When we write the files out as a cache in Java, we can user RandomAccessFile to reload them
+    - Very good performance
+    - Also means random shuffling should be fast and simple
+  - Java has a class called Unsafe that allows us native memory access
+    - Way faster than serialization libraries
+    - http://mechanical-sympathy.blogspot.com/2012/07/native-cc-like-performance-for-java.html
+
+## Disruptor-based Processor
+
+```{c eval=FALSE}
+// Assumes a class MessageEvent with a field FeatureVector fv
+public class MessageEventHandler implements EventHandler<MessageEvent>
+{
+    /**
+     * On a message, check if it is a null FV.  If so, we are at the end of an epoch.
+     * @param messageEvent An FV holder
+     * @param l Sequence number (which is increasing)
+     * @param b not used
+     * @throws Exception
+     */
+    @Override
+    public void onEvent(MessageEvent messageEvent, long l, boolean b) throws Exception
+    {
+        if (messageEvent.fv == null)
+        {
+            onEpochEnded();
+        }
+        learner.trainOne(model, messageEvent.fv);
+    }
+```
+## Publishing Feature Vectors for processing
+```{c eval=FALSE}
+public void start(Learner learner, Model model, int numEpochs, File cacheFile, int bufferSize)
+{
+    this.numEpochs = numEpochs;
+    executor = Executors.newSingleThreadExecutor();
+    MessageEventFactory factory = new MessageEventFactory();
+    WaitStrategy waitStrategy = (strategy == Strategy.YIELD) ? new YieldingWaitStrategy(): new BusySpinWaitStrategy();
+    disruptor = new Disruptor<MessageEvent>(factory, ExecUtils.nextPowerOf2(bufferSize), executor, ProducerType.SINGLE, waitStrategy);
+    handler = new MessageEventHandler(learner, model);
+    disruptor.handleEventsWith(handler);
+    this.cacheFile = cacheFile;
+    disruptor.start();
+}
+
+@Override
+public void add(FeatureVector fv)
+{
+    RingBuffer<MessageEvent> ringBuffer = disruptor.getRingBuffer();
+    long sequence = ringBuffer.next();
+    try
+    {
+        MessageEvent event = ringBuffer.get(sequence);
+        event.fv = fv;
+    }
+    finally
+    {
+        ringBuffer.publish(sequence);
+    }
+}
+```
+
+## Dealing with fixed width feature vectors
+
+- Problem: during feature extraction, you extract millions of features with some string name
+  - To build a feature vector, you need a Dictionary mapping strings to feature indices, dimension _D_
+  - As your vocab gets larger and larger, use more and more RAM storing this
+  - Also, if unlucky and using a bad implementation of a data structure, may be additional overhead to this
+  - If you arent using a sparse vector, you may also have a big problem!
+- Furthermore, for memory efficiency and processing speed, we would rather not allocate a new feature vector each time
+  - Could dynamically grow the vector as needed, but would rather work with fixed width vectors
+
+## Solution 1: Feature Hashing
+
+- In feature hashing, we dont build a Dictionary mapping feature name to index, we just hash it!
+  - Pick a number of bits *_k_*
+  - use a good hash function (e.g. Murmur hash), AND the output with (2^*_k_*)-1
+
+- Also this means that our feature vector itself is *_k_* bits as well
+  - Can pre-allocate exactly the necessary number of bytes in our fixed buffer
+  - John Langford: _"Online Learning + Hashing = learning algorithm with fully controlled memory footprint -> Robustness"_
+  - http://cilvr.cs.nyu.edu/diglib/lsml/lecture08-hashing.pdf
+
+## Feature Hashing Implementation
+
+```{c eval=FALSE}
+public class HashFeatureEncoder implements FeatureNameEncoder
+{
+    int space;
+
+    /**
+     * Default constructor, how many bits to use
+     * @param nbits number bits to use
+     */
+    public HashFeatureEncoder(int nbits)
+    {
+        this.space = (int)Math.pow(2, nbits) - 1;
+    }
+
+    /**
+     * Constant time lookup into space
+     * @param name feature name
+     * @return
+     */
+    @Override
+    public Integer indexOf(String name)
+    {
+        return MurmurHash.hash32(name) & space;
+    }
+...
+}
+
+```
+
+## What about the feature vector itself, surely other ways to collapse
+
+- Recent NLP approach
+  - Convert "sparse one-hot" representation to "dense continuous" representation
+  - For example, we can use pre-trained embeddings from word2vec or glove as input
+  - A bag of words document in continuous space is still a sum operation in continous space
+    - Meaning simple BoW classifiers are trivial
+
+## Word2vec Example
+
+- Word2vec maps a one hot vector to a continuous representation in embedded space
+  - Train a shallow neural net (SGNS or CBOW)
+    - Pop the base projection layer out
+    - This yields a matrix of connections of size *_|V| x layerSz_*
+    - Formula for lookup is then easy, but we have to keep V LUT in memory again
+
+## Getting the word2vec result
+
+```{c eval=FALSE}
+
+// LUT from literal word to its index in vectors
+private final Map<String, Integer> vocab;
+
+private final float[][] vectors; // |V| x layerSz
+
+public float[] getVec(String word)
+{
+    if (vocab.containsKey(word))
+    {
+        return this.vectors[vocab.get(word)];
+    }
+    return this.NULLV;
+}
+```
+
+## Building up a feature vector
+
+```{c eval=FALSE}
+...
+// Parse a sentence and place results in a continuous Bag of Words
+DenseVectorN x = new DenseVectorN((int)embeddingSize);
+ArrayDouble xArray = x.getX();
+
+while (tokenizer.hasMoreTokens())
+{
+    String word = tokenizer.nextToken().toLowerCase();
+    float[] wordVector = word2vecModel.getVec(word);
+    for (int j = 0, sz = xArray.size(); j < sz; ++j)
+    {
+        xArray.addi(j, wordVector[j]);
+    }
+}
+
+final FeatureVector fv = new FeatureVector(label, x);
+```
+
+## Optimizations for Sparse Feature Vectors
+
+
+$$w^{(t+1)} = (1 - \eta_t \lambda) w^{(t)} - \eta_t x_t \frac{\partial{Q}}{\partial{f(x)}} Q(y_t, f(x_t))$$
+
+  - Bottou identifies a refactoring in SGD tricks that increase speed for sparse feature vectors
+    - Complexity then scales with number of non-zero terms
+
+$$s_{t+1} = (1 - \eta_t \lambda) s_t$$
+$$g_t = Q'(y_t s_t W_t x_t)$$
+
+$$\frac{(1 - \eta_t \lambda) s_t W_t}{(1 - \eta_t \lambda) s_t} - \frac{\eta_t x_t g_t}{s_{t+1}}$$ 
+
+$$W_{t+1} = W_t - \eta_t g_t x_t/s_{t+1}$$
+
+
+
+## Optimizations for Sparse Feature Vectors - Hogwild
+  - Hogwild
+    - Multiple threads run at the same time clobber weights
+    - Processors allowed equal access to shared memory and are able to update inidivual components of memory at will
+    - When data is sparse, memory overwrites are rare and barely introduce any error in the computation when they do
+    - Enables near-linear speedups
+
+
