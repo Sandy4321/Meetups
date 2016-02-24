@@ -346,7 +346,7 @@ public class MessageEventHandler implements EventHandler<MessageEvent>
         learner.trainOne(model, messageEvent.fv);
     }
 ```
-## Publishing Feature Vectors for processing
+## Publishing Feature Vectors
 ```{c eval=FALSE}
 public void start(Learner learner, Model model, int numEpochs, int bufferSize)
 {
@@ -361,8 +361,6 @@ public void start(Learner learner, Model model, int numEpochs, int bufferSize)
     disruptor.handleEventsWith(handler);
     disruptor.start();
 }
-
-@Override
 public void add(FeatureVector fv)
 {
     RingBuffer<MessageEvent> ringBuffer = disruptor.getRingBuffer();
@@ -379,7 +377,7 @@ public void add(FeatureVector fv)
 }
 ```
 
-## Dealing with fixed width feature vectors
+## Dealing with fixed-width Feature Vectors
 
   - Problem: during feature extraction, you extract millions of features with some string name
     - To build a feature vector, you need a Dictionary mapping strings to feature indices, dimension _D_
@@ -494,7 +492,7 @@ final FeatureVector fv = new FeatureVector(label, x);
 
 $$w^{(t+1)} = (1 - \eta_t \lambda) w^{(t)} - \eta_t x_t \frac{\partial{Q}}{\partial{f(x)}} Q(y_t, f(x_t))$$
 
-  - Bottou identifies a refactoring in SGD tricks that increase speed for sparse feature vectors
+  - Bottou identifies a refactoring in SGD tricks
     - Complexity then scales with number of non-zero terms
 $$w_t = s_t W_t$$
 $$s_{t+1} = (1 - \eta_t \lambda) s_t$$
@@ -673,6 +671,7 @@ Total hashing collisions 7065689
     - http://cilvr.cs.nyu.edu/diglib/lsml/lecture08-hashing.pdf
   - Intro to Stat. Machine Learning NNs - Samy Bengio
     - http://bengio.abracadoudou.com/lectures/old/tex_ann.pdf
+
 ## References - 2
   - Disruptor Performance (LMAX)
     - https://github.com/LMAX-Exchange/disruptor/wiki/Performance-Results
