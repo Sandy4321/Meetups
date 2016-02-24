@@ -14,23 +14,26 @@ output:
 
 ## Overview (Part I)
   - Background
-  - Classification/regression in an average loss framework using
-    - Stochastic Gradient Descent (SGD)
+  - Classification/Regression as Empirical Risk Minimization framework with
     - Loss functions
+    - Stochastic Gradient Descent (SGD)
+    - Learning Rate Decay
+    - Out-of-core processing
     - Feature Hashing/Word Embeddings
     - Optimizations for sparse features
-    - Out-of-core processing
-  - Improving our model with generative features
+
+  - NLP Example: SVM with Generative Features
 
 ## Overview (Part II)
   
   - Refitting our framework for deep learning
-    - Dense Representations
+    - More on Dense Representations
     - Multiclass learning
   - Fully Connected Layers
   - Convolutional Layers
   - Max Over Time, K-Max
-  - Fine tuning embeddings
+  - Language Choices
+  - On GPUs
 
 
 ## Background (Part I)
@@ -42,7 +45,7 @@ output:
   - Want to do it efficiently
     - Dont load whole batch into memory
   
-  - Ideally, learning approach that doesnt scale in time with the training set size 
+  - Desire a learning approach that is not bottlenecked by the training set size 
   
   - Additionally remember that in NLP, tend to have lots of sparse features
     - Would like to optimize as well for this
@@ -50,15 +53,17 @@ output:
 ## Sources
 
   - This talk borrows most of its content from work of 
-    - Leon Bottou
-    - Ronan Collobert
-    - Yann LeCun
-    - John Langford
-
+    - Leon Bottou - researcher, SGD evangelist, author of sgd demo code
+    - Ronan Collobert - Bottou's PhD student, creator of Torch
+    - Yann LeCun - head of FAIR, researcher, creator of LeNet5
+    - John Langford - researcher at MS Research, author of Vowpal Wabbit
+    
+  - These guys have done enough individually that it would take the whole slideshow just to list!
+  
 ## Some Basic Definitions - Machine Learning
 
   - What is Machine Learning?
-    - Me: _"Learn from training data to predict future outcomes given input parameters"_
+    - Me: _"Learn from training data to predict unknown outcomes given input parameters"_
     
     - Ronan Collobert: _"Machine Learning aims to minimize the expected risk (generalization error) using only the information of the training set"_
       - _"We are seeking a function f in a set of functions F which minimizes the cost function *Q* over *Z*"_
@@ -70,7 +75,6 @@ output:
 
   - As training data increases, empirical risk converges to expected risk!
     - Weak law of large numbers!
-    - Also, as long as *VC dim* is finite, the minimium of the empirical risk converges to the minimum of the expected risk!
 
 ## Some Basic Definitions - Data
 
@@ -123,13 +127,13 @@ $$w_j^{(i+1)} = w_j^{(i)} - \eta \sum_{n=1}^{N} \frac{\partial{Q}}{\partial{f(x)
 
   - A problem with GD is that it must see the entire "batch" *_N_* before it makes a parameter update
     - This means that its a function of *_N_* and of *_D_* for a parameter update
-      - Not scalable to large datasets!
+      - Learning scales with size of dataset!
 
   - What if instead of updating per batch, we updated per training example?
     - Approximate gradient with single random example
     - Parameter update is a function of *_D_* now only.
-    - There could be local noise, which could throw off the approximation, but
-    - in practice, works extremely well, tends to learn more stuff faster
+    - There could be local noise, which could throw off the approximation
+    - In practice, works extremely well, tends to learn more stuff faster
 
   $$w^{(t+1)} = w^{(t)} - \eta \nabla Q(y_t, f(x_t))$$
 
@@ -178,12 +182,30 @@ public class SquaredLoss implements Loss
 }
 ```
 
+## Code for Hinge Loss function
+```{c eval=FALSE}
+public class HingeLoss implements Loss
+{
+    @Override
+    public double loss(double p, double y)
+    {
+        return Math.max(0, 1 - p * y);
+    }
+
+    @Override
+    public double dLoss(double p, double y)
+    {
+        return (Math.max(0, 1 - p * y) == 0) ? 0 : -y;
+    }
+}
+```
+
 ## Code for SGD
 
 ```{c eval=FALSE}
 /**
  *  Do simple stochastic gradient descent update step
- *  @param vectorN Feature vector with label
+ *  @param vectorN Feature vector
  *  @param eta Learning rate (step size)
  *  @param lambda regularization param
  *  @param dLoss loss WRT f(x): dLoss = lossFunction.dLoss(fx, y);
@@ -215,7 +237,7 @@ public void updateWeights(VectorN vectorN, double eta, double lambda, double dLo
     - at each iteration t:
     $$\eta(t) = \frac{\eta0}{1 + s * \eta_d}$$
 
-## Example code with Progressive Decay
+## Example code with Robbins-Monro decay
 
 ```{c eval=FALSE}
 public class RobbinsMonroUpdateSchedule implements LearningRateSchedule
@@ -264,17 +286,17 @@ public final void trainOne(Model model, FeatureVector fv)
 
 ## Memory efficient online out-of-core processing
 
-  - One problem with many machine learning libraries is that they require the whole problem in working memory
-  - With SGD, easy to avoid, and we dont want since datasets presumably large
+  - Many machine learning libraries require the whole problem in working memory
+  - With SGD, easy to avoid, undesirable since datasets large
   - Could read a line at a time from a file in sequence
     - But, File IO interrupts processing in single thread version
-    - Also, loading file IO on large datasets can actually become the bottleneck!  
-  - Instead, could use a fixed size circular buffer to feed the SGD from memory, and use another thread to feed that queue
+    - IO on large datasets with fast training algo becomes the processing bottleneck  
+  - Use a fixed size circular buffer to feed SGD from memory, use another thread to feed that queue
     - Vowpal Wabbit uses this technique
 
 ![Circular Buffer](figure/circ-buf.jpg)
 
-## More Details on Circular Buffer
+## More Details on Circular Buffer Training Implementation
 
   - File IO thread
      - Reads the data from file
@@ -283,22 +305,23 @@ public final void trainOne(Model model, FeatureVector fv)
      - Signals the processor thread at ends of epochs
      - Re-reads the data from cache on subsequent epochs
 
-  - Processor (consumer) thread reads example from the circular buffer and processes it
-  
-  - Relatively easy, but in practice, kind of painful
+  - Processor (consumer) thread reads example from the circular buffer and trains with it
+     - Ideally, callback at end of epoch
+
+  - Relatively easy, but in practice, kind of painful to test
 
 ## A Few Details in Implementation in Java
 
-  - Java has a nice ring buffer library called *Disruptor*
-    - https://github.com/LMAX-Exchange/disruptor
+  - Java has a nice ring buffer library called *Disruptor* - _very fast_
+    - Lock free, low latency, prevent JVM GC stalls, memory allocation
+    - > 5x gains over ArrayBlockingQueue in similar config
     - To utilize, we need to overload a class called EventHandler, and a MessageEvent
 
   - When we write the files out as a cache in Java, we can user RandomAccessFile to reload them
     - Very good performance
-    - Also means random shuffling should be fast and simple
-  - Java has a class called Unsafe that allows us native memory access
-    - Way faster than serialization libraries
-    - http://mechanical-sympathy.blogspot.com/2012/07/native-cc-like-performance-for-java.html
+    - Also, random shuffling can be fast and simple
+  - Java has an undocumented class called *Unsafe* that allows us native memory access
+    - Way faster than serialization libraries (> 1000x)
 
 ## Disruptor-based Processor
 
@@ -325,16 +348,17 @@ public class MessageEventHandler implements EventHandler<MessageEvent>
 ```
 ## Publishing Feature Vectors for processing
 ```{c eval=FALSE}
-public void start(Learner learner, Model model, int numEpochs, File cacheFile, int bufferSize)
+public void start(Learner learner, Model model, int numEpochs, int bufferSize)
 {
     this.numEpochs = numEpochs;
     executor = Executors.newSingleThreadExecutor();
     MessageEventFactory factory = new MessageEventFactory();
     WaitStrategy waitStrategy = (strategy == Strategy.YIELD) ? new YieldingWaitStrategy(): new BusySpinWaitStrategy();
-    disruptor = new Disruptor<MessageEvent>(factory, ExecUtils.nextPowerOf2(bufferSize), executor, ProducerType.SINGLE, waitStrategy);
+    disruptor = 
+        new Disruptor<MessageEvent>(factory, ExecUtils.nextPowerOf2(bufferSize), 
+                                    executor, ProducerType.SINGLE, waitStrategy);
     handler = new MessageEventHandler(learner, model);
     disruptor.handleEventsWith(handler);
-    this.cacheFile = cacheFile;
     disruptor.start();
 }
 
@@ -357,24 +381,23 @@ public void add(FeatureVector fv)
 
 ## Dealing with fixed width feature vectors
 
-- Problem: during feature extraction, you extract millions of features with some string name
-  - To build a feature vector, you need a Dictionary mapping strings to feature indices, dimension _D_
-  - As your vocab gets larger and larger, use more and more RAM storing this
-  - Also, if unlucky and using a bad implementation of a data structure, may be additional overhead to this
-  - If you arent using a sparse vector, you may also have a big problem!
-- Furthermore, for memory efficiency and processing speed, we would rather not allocate a new feature vector each time
-  - Could dynamically grow the vector as needed, but would rather work with fixed width vectors
+  - Problem: during feature extraction, you extract millions of features with some string name
+    - To build a feature vector, you need a Dictionary mapping strings to feature indices, dimension _D_
+    - As your vocab gets larger, RAM usage increases with each word!
+    - Also, if unlucky and using a bad implementation of a data structure, may be additional overhead to this
+    - Sparse vector implementation also might help!
+  - For memory efficiency and processing speed, don't allocate a new feature vector each time
+    - Could grow vector as needed, but rather work with fixed width vectors
 
-## Solution 1: Feature Hashing
+## Introducing Feature Hashing
 
-- In feature hashing, we dont build a Dictionary mapping feature name to index, we just hash it!
-  - Pick a number of bits *_k_*
-  - use a good hash function (e.g. Murmur hash), AND the output with (2^*_k_*)-1
+  - In feature hashing, we dont build a Dictionary mapping feature name to index, we just hash it!
+    - Pick a number of bits *_k_*
+    - use a good hash function (e.g. Murmur hash), AND the output with (2^*_k_*)-1
 
-- Also this means that our feature vector itself is *_k_* bits as well
-  - Can pre-allocate exactly the necessary number of bytes in our fixed buffer
-  - John Langford: _"Online Learning + Hashing = learning algorithm with fully controlled memory footprint -> Robustness"_
-  - http://cilvr.cs.nyu.edu/diglib/lsml/lecture08-hashing.pdf
+  - Also this means that our feature vector itself is *_k_* bits as well
+    - Can pre-allocate exactly the necessary number of bytes in our fixed buffer
+    - John Langford: _"Online Learning + Hashing = learning algorithm with fully controlled memory footprint -> Robustness"_
 
 ## Feature Hashing Implementation
 
@@ -407,21 +430,21 @@ public class HashFeatureEncoder implements FeatureNameEncoder
 
 ```
 
-## What about the feature vector itself, surely other ways to collapse
+## Other Ways to Collapse Features?
 
-- Recent NLP approach
-  - Convert "sparse one-hot" representation to "dense continuous" representation
-  - For example, we can use pre-trained embeddings from word2vec or glove as input
-  - A bag of words document in continuous space is still a sum operation in continous space
-    - Meaning simple BoW classifiers are trivial
+  - Recently popular NLP approach - Continuous Representations
+    - Convert "sparse one-hot" representation to "dense continuous" representation
+    - For example, we can use pre-trained embeddings from word2vec or glove as input
+    - A BoW document in continuous space is still a sum operation in continous space
+    - YMMV without deeper learning
 
-## Word2vec Example
+## Word2vec Embeddings Briefly
 
-- Word2vec maps a one hot vector to a continuous representation in embedded space
-  - Train a shallow neural net (SGNS or CBOW)
-    - Pop the base projection layer out
-    - This yields a matrix of connections of size *_|V| x layerSz_*
-    - Formula for lookup is then easy, but we have to keep V LUT in memory again
+  - Word2vec maps a one hot vector to a continuous representation in embedded space
+    - Train a shallow neural net (SGNS or CBOW)
+    - Pop the base hidden layer connections out
+    - Matrix of connections of size *_|V| x layerSz_*
+    - Formula for lookup is then easy, but we have to keep Vocab LUT in memory again
 
 ## Getting the word2vec result
 
@@ -442,7 +465,7 @@ public float[] getVec(String word)
 }
 ```
 
-## Building up a feature vector
+## Building up Dense Feature Vectors
 
 ```{c eval=FALSE}
 ...
@@ -452,10 +475,12 @@ ArrayDouble xArray = x.getX();
 
 while (tokenizer.hasMoreTokens())
 {
+    // Optional, problem dependent
     String word = tokenizer.nextToken().toLowerCase();
     float[] wordVector = word2vecModel.getVec(word);
     for (int j = 0, sz = xArray.size(); j < sz; ++j)
     {
+        // CBoW
         xArray.addi(j, wordVector[j]);
     }
 }
@@ -465,14 +490,15 @@ final FeatureVector fv = new FeatureVector(label, x);
 
 ## Optimizations for Sparse Feature Vectors
 
+- Remember from before, SGD with regularization:
 
 $$w^{(t+1)} = (1 - \eta_t \lambda) w^{(t)} - \eta_t x_t \frac{\partial{Q}}{\partial{f(x)}} Q(y_t, f(x_t))$$
 
   - Bottou identifies a refactoring in SGD tricks that increase speed for sparse feature vectors
     - Complexity then scales with number of non-zero terms
-
+$$w_t = s_t W_t$$
 $$s_{t+1} = (1 - \eta_t \lambda) s_t$$
-$$g_t = Q'(y_t s_t W_t x_t)$$
+$$g_t = Q'(y_t, s_t W_t x_t)$$
 
 $$\frac{(1 - \eta_t \lambda) s_t W_t}{(1 - \eta_t \lambda) s_t} - \frac{\eta_t x_t g_t}{s_{t+1}}$$ 
 
@@ -481,10 +507,184 @@ $$W_{t+1} = W_t - \eta_t g_t x_t/s_{t+1}$$
 
 
 ## Optimizations for Sparse Feature Vectors - Hogwild
-  - Hogwild
-    - Multiple threads run at the same time clobber weights
+
+  - Hogwild - Technique used by Word2vec code
     - Processors allowed equal access to shared memory and are able to update inidivual components of memory at will
     - When data is sparse, memory overwrites are rare and barely introduce any error in the computation when they do
     - Enables near-linear speedups
 
+## Use Case: Online Learning in the Wild for NLP
+  - Fascinating paper by Wang, Manning (2012)
+    - SVM with generative features beats many approaches to Sentiment, Reviews and News categorization
+    - Later found to be true with longer N-grams and LR (Mesnil, Mikolov, Bengio)
+  - Think of feature vector activation in BoW model as attesting a feature with a value
+    - Normally "one-hot"" sum
+    - Can be other things, e.g., _tf-idf_ weight
+    - But we can use more valuable weights!
+    
+## nbsvm Details
+  
+  - Remember Naive Bayes?
+  
+  $$p(C|D) \propto [\prod_{i=0}^{|V_D|} p(w_i|C)] p(C)$$
 
+  - What if we use the likelihood ratio of components as features?
+    - Simple to do, build a lexicon of feature counts over classes upfront
+    - Calculate likelihood ratio of word in classes
+    - When word is attested, apply weight as Feature value
+    
+  - We also will use a linear weighting between this SVM and NB (regularization)
+    - Note that, with uniform priors, log likelihood sum is the NB probability of class
+
+## nbsvm-xl Idea
+  - Use everything we have learned to build large scale implementation
+    - Feature hashing
+    - LR/SVM
+    - Fast out-of-core SGD (and optionally Adagrad) processing
+    
+  - Should be much faster than nbsvm, which uses liblinear, especially as dataset size increases
+
+## nbsvm-xl Feature Weights
+
+```{c eval=FALSE}
+// Look up the generative feature
+private void toFeature(Set<Integer> set, List<Offset> offsets, String... str)
+{
+    String joined = CollectionsManip.join(str, "_*_");
+    int idx = hashFeatureEncoder.indexOf(joined);
+
+    if (!set.contains(idx))
+    {
+        set.add(idx);
+        Double v = lexicon.get(idx);
+        offsets.add(new Offset(idx, v));
+    }
+}
+```
+
+## nbsvm-xl Lexicon extraction
+
+```{c eval=FALSE}
+
+// increment joins and hashes feature, as above, increments count in label specific ftable
+for (int i = 0, sz = text.size(); i < sz; ++i)
+{
+    // Circular
+    lll = ll;
+    ll = l;
+    l = t;
+    t = text.get(i);
+    // unigram
+    increment(ftable, t);
+    numTokens[labelIdx]++;
+    // bigram?
+    if (ngrams > 1 && l != null)
+    {
+        // trigram?
+        increment(ftable, l, t);
+        numTokens[labelIdx]++;
+        if (ngrams > 2 && ll != null)
+        {
+            increment(ftable, ll, l, t);
+            numTokens[labelIdx]++;
+        }
+        ...
+    }
+}
+```
+
+## nbsvm-xl Lexicon generation
+
+```{c eval=FALSE}
+
+double numTotalF0 = numTokens[0] + alpha * uniqueWordsF0;
+double numTotalF1 = numTokens[1] + alpha * uniqueWordsF1;
+
+for (Integer word : words)
+{
+    double f0 = (CollectionsManip.getOrDefault(ftable0, word, 0L) + alpha)/numTotalF0;
+    double f1 = (CollectionsManip.getOrDefault(ftable1, word, 0L) + alpha)/numTotalF1;
+    lexicon.put(word, Math.log(f1 / f0));
+}
+```
+
+## Bakeoff (sorta)
+
+  - Only 25k training examples available when using script provided by nbsvm
+    - get these by running oh_my_gosh.sh from checkout of Mesnil's implementation
+    - This is far from large, but still
+  - Not good way of seeing real-time other than using _time_ command
+  - My machine crushes data
+     - Much faster than the estimates given by Mesnil
+
+## nbsvm Performance (Trigrams)
+
+```
+dpressel@dpressel:~/dev/work/nbsvm_run$ time python ../nbsvm/nbsvm.py --liblinear liblinear-1.96 --ptrain data/train-pos.txt --ntrain data/train-neg.txt --ptest data/test-pos.txt --ntest data/test-neg.txt --ngram 123 --out NBSVM-TEST-TRIGRAM
+counting...
+computing r...
+processing files...
+iter  1 act 1.236e+04 pre 1.070e+04 delta 8.596e+00 f 1.733e+04 |g| 7.848e+03 CG   7
+iter  2 act 3.132e+03 pre 2.542e+03 delta 1.033e+01 f 4.970e+03 |g| 2.126e+03 CG   9
+iter  3 act 9.326e+02 pre 7.520e+02 delta 1.033e+01 f 1.838e+03 |g| 7.607e+02 CG   9
+iter  4 act 2.631e+02 pre 2.130e+02 delta 1.033e+01 f 9.055e+02 |g| 2.825e+02 CG   8
+iter  5 act 7.708e+01 pre 6.203e+01 delta 1.033e+01 f 6.424e+02 |g| 1.066e+02 CG   7
+iter  6 act 3.909e+01 pre 3.054e+01 delta 1.033e+01 f 5.653e+02 |g| 4.129e+01 CG   9
+Accuracy = 91.872% (22968/25000)
+
+real	1m44.156s
+user	1m43.172s
+sys	0m1.280s
+```
+
+## nbsvm-xl Performance (Trigrams)
+```
+xl.nbsvm.NBSVM --train /home/dpressel/dev/work/nbsvm_run/data/train-xl.tsv --eval /home/dpressel/dev/work/nbsvm_run/data/test-xl.tsv 
+--cgrams 0 --ngrams 3 --nbits 26 --loss log --epochs 10 -e0 0.05 --lambda 1e-6 --beta 1
+
+4951537 hash words in lexicon, aggregated in 6.72s.  Starting training
+Trained model in 18.81s.  25000 training examples seen
+22969 / 25000
+Model accuracy 91.88 %
+Total hashing collisions 7065689
+```
+
+## nbsvm-xl Performance In General
+
+  - This difference gets more stark with large datasets
+    - Our out-of-core SGD remains incredibly consistent!
+  - Previous attempt, last laptop million examples from Twitter
+    - 1.5 minutes to build lexicon
+    - 45s first epoch (due to overlap)
+    - 15s for additional epochs
+  
+## References - 1
+  - Ronan Collobert's Thesis
+    - http://ronan.collobert.org/pub/matos/2004_phdthesis_lip6.pdf
+  - Tradeoffs of Large-Scale Learning (Bottou, Bousquet)
+    - http://leon.bottou.org/publications/pdf/nips-2007.pdf
+  - SGD Tricks (Bottou)
+    - http://research.microsoft.com/pubs/192769/tricks-2012.pdf
+  - Large Scale Online Learning (Bottou/LeCun)
+    - http://leon.bottou.org/publications/pdf/nips-2003.pdf
+  - Hogwild
+    - http://www.eecs.berkeley.edu/~brecht/papers/hogwildTR.pdf
+  - Feature Hashing (Langford)
+    - http://cilvr.cs.nyu.edu/diglib/lsml/lecture08-hashing.pdf
+
+## References - 2
+  - Disruptor Performance (LMAX)
+    - https://github.com/LMAX-Exchange/disruptor/wiki/Performance-Results
+  - Unsafe IO vs Serialization (Thompson)
+    - http://mechanical-sympathy.blogspot.com/2012/07/native-cc-like-performance-for-java.html
+  - Reference code
+    - https://github.com/dpressel/sgdtk
+  - NBSVM Paper (Wang/Manning)
+    - http://nlp.stanford.edu/pubs/sidaw12_simple_sentiment.pdf
+  - Ensemble of Generative and Discriminative Techniques... (Mesnil)
+    - http://arxiv.org/pdf/1412.5335v5.pdf
+  - nbsvm baseline code
+    - https://github.com/mesnilgr/nbsvm
+  - nbsvm SGD reference code
+    - https://github.com/dpressel/nbsvm-xl
+  
