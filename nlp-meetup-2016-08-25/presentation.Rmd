@@ -223,7 +223,7 @@ public void updateWeights(VectorN vectorN, double eta, double lambda, double dLo
 }
 ```
 
-## A Note about learning rates
+## Learning Rate Decay
 
   - We often want to slow down the learning rate over time.  This prevents overshooting as we get closer
     - step size too big: optimization diverges
@@ -234,8 +234,8 @@ public void updateWeights(VectorN vectorN, double eta, double lambda, double dLo
     $$\eta = \eta_0$$
     - decay
     $$\eta_d$$
-    - at each iteration t:
-    $$\eta(t) = \frac{\eta0}{1 + s * \eta_d}$$
+    - at each iteration _t_:
+    $$\eta(t) = \frac{\eta0}{1 + t \eta_d}$$
 
 ## Example code with Robbins-Monro decay
 
@@ -284,7 +284,7 @@ public final void trainOne(Model model, FeatureVector fv)
 }
 ```
 
-## Memory efficient online out-of-core processing
+## Memory efficient processing
 
   - Many machine learning libraries require the whole problem in working memory
   - With SGD, easy to avoid, undesirable since datasets large
@@ -671,7 +671,8 @@ Total hashing collisions 7065689
     - http://www.eecs.berkeley.edu/~brecht/papers/hogwildTR.pdf
   - Feature Hashing (Langford)
     - http://cilvr.cs.nyu.edu/diglib/lsml/lecture08-hashing.pdf
-
+  - Intro to Stat. Machine Learning NNs - Samy Bengio
+    - http://bengio.abracadoudou.com/lectures/old/tex_ann.pdf
 ## References - 2
   - Disruptor Performance (LMAX)
     - https://github.com/LMAX-Exchange/disruptor/wiki/Performance-Results
