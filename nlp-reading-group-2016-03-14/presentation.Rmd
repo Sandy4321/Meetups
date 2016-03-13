@@ -36,7 +36,7 @@ output:
 ## Network Overview
 
   - Create DNN with
-     - "Window approach"" - fixed window fully connected deep network (Collobert 2011)
+     - "Window approach" - fixed window fully connected deep network (Collobert 2011)
      - Sentence Log Likelihood Cost - structured prediction using transition weights (Collobert 2011)
      - Concatenate word and character features - word2vec + char embeddings with convolution and pooling 
 
@@ -120,7 +120,7 @@ $$\theta \mapsto \sum_{([w]_{1}^{N}, [y]_{1}^{N}) \in D} -\log p([y]_{1}^{N}|[w]
 
 ![POS Hyperparameters](figure/poshyper.png)
 
-# NER Training Details
+## NER Training Details
 
  - Same!
  
