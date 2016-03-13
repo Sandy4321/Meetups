@@ -3,7 +3,7 @@ title: "Learning Character-level Representations for POS Tagging (_dos Santos, Z
 
 subtitle: "Boosting Named Entity Recognition with Neural Character Embeddings (_dos Santos, Guimaraes_)"
 author: "Dan Pressel"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: "March 14th, 2016"
 output:
   ioslides_presentation:
     widescreen: yes
