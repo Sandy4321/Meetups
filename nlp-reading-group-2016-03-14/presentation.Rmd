@@ -56,7 +56,7 @@ output:
   - Non-linearity
   - Fully connected layer outputs to number of output classes
     - 45 labels for English POS tagger, 22 for Portuguese
-    - 10 for NER tagger (check this)
+    - 10 for NER tagger (5 for "selective")
   
 ## Window Approach (Collobert 2011)
 
@@ -122,7 +122,8 @@ $$\theta \mapsto \sum_{([w]_{1}^{N}, [y]_{1}^{N}) \in D} -\log p([y]_{1}^{N}|[w]
 
 ## NER Training Details
 
- - Same!
+ - Same (except SPA CoNLL-2002)
+   - Learning rate set to 0.005 "to avoid divergence"
  
  ![NER Hyperparameters](figure/nerhyper.png)
 
@@ -168,7 +169,14 @@ $$\theta \mapsto \sum_{([w]_{1}^{N}, [y]_{1}^{N}) \in D} -\log p([y]_{1}^{N}|[w]
 ![DNNs for NER](figure/dnn-spa-conll-ner.png)
 ![SotA Comparison](figure/sota-spa-conll-ner.png)
 
+  - CoNLL scorer
+
 ## NER Results (Portuguese)
 
 ![DNNs for NER](figure/dnn-harem-ner.png)
+
+  - CoNLL Scorer
+
 ![SotA Comparison](figure/sota-harem-ner.png)
+
+  - HAREM I scorer
