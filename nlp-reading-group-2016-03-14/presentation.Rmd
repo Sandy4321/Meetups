@@ -140,7 +140,7 @@ $$\theta \mapsto \sum_{([w]_{1}^{N}, [y]_{1}^{N}) \in D} -\log p([y]_{1}^{N}|[w]
 
   - Comparison against 2 other Deep Models, and SotA
   - Deep Models: Words plus two shape parameters (Caps, Suffix)
-    - $caps \in {all lower, first upper, all upper, contains upper, other}$
+    - caps outcomes: _{all lower, first upper, all upper, contains upper, other}_
     - suffix length 2 for English, 3 for Portuguese
   - SoTA uses many handcrafted features
     - Decisions Trees + TBL (Portuguese) (dos Santos et. al. 2012)
