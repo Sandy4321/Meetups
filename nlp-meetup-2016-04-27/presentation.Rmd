@@ -584,3 +584,5 @@ $$h_t = o_t \cdot tanh(c_t)$$
     - http://research.microsoft.com/pubs/226641/CNTKBook-20160217..pdf
   - Theano manual Graph section
     - http://deeplearning.net/software/theano/extending/graphstructures.html
+  - Presentation discussing implementing convolution in time and frequency domain (in C++ and R)
+    - https://cdn.rawgit.com/AnnArborRUserGroup/Presentations/master/2015-11/rjava-rcpp/presentation.html#1
