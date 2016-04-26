@@ -500,11 +500,11 @@ $$h_t = o_t \cdot tanh(c_t)$$
 
 ## Characters and Morphology
 
-  - Characters are important for morphology
+  - Characters and Morphology important for most tagging tasks
     - Collobert used separate handcrafted features for this
     - dos Santos improves on Collobert model using character compositions learned using CMOT architecture
-  - Would we get an improvement just by averaging? (obviously wouldnt likely be as good, but quick and dirty)
-    - Seems to be a yes, even training using word2vec for embeddings for characters
+  - Would we get an improvement just by averaging char vectors? (obviously wouldnt likely be as good, but quick and dirty)
+    - Seems to be a yes, slight improvement on Twitter POS!
     - Keep it simple for these examples
     - Code is very similar to what was shown for CMOT
 
