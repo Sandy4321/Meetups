@@ -349,7 +349,8 @@ end
     - We can initialize our weights with word2vec model
 
   - For very sparse data, or when morphology important, use character level embeddings
-    - Here just use word2vec on char-split data, average together for a word
+    - Simple idea: use word2vec on char-split data (small context windows), average together for a word
+    - Note: Better ways exist to combine letters to words (CNN, dos Santos model, BLSTM, Ling model)
 
 ## CMOT Model
 

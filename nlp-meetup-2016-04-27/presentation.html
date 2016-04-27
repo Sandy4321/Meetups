@@ -89,7 +89,7 @@
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">26 April, 2016</p>
+            <p style="margin-top: 6px; margin-left: -2px;">27 April, 2016</p>
           </hgroup>
   </slide>
 
@@ -448,7 +448,7 @@ B</pre>
 <li>Collobert: Tagging a word considers the whole sentence
 
 <ul>
-<li>Produces local features around each word of the sentence, combine into a global feature vector fed to standard affine layers</li>
+<li>Produces local features around each word of the sentence, combine into a global feature vector fed to standard layers</li>
 </ul></li>
 </ul>
 
@@ -476,13 +476,13 @@ for k=1,nK do
     end
 end</pre>
 
-</article></slide><slide class=''><hgroup><h2>Simple Convolution/Max-Over-Time CMOT Architecture</h2></hgroup><article  id="simple-convolutionmax-over-time-cmot-architecture" class="smaller ">
+</article></slide><slide class=''><hgroup><h2>Simple Convolution/Max-Over-Time (CMOT) Architecture</h2></hgroup><article  id="simple-convolutionmax-over-time-cmot-architecture" class="smaller ">
 
 <ul>
 <li>Here is a simple CNN that works very well on short texts
 
 <ul>
-<li>Convolutional layer generating between 60 and 500 feature maps</li>
+<li>Convolutional layer generating between 60 and 500 feature maps, followed by non-linearity</li>
 <li>Max over time pooling generating a hidden output of same size as # feature maps</li>
 <li>Linear layer to number of classes</li>
 <li>Softmax output</li>
@@ -490,14 +490,15 @@ end</pre>
 <li>Use word2vec embeddings as pretraining for a Lookup Table
 
 <ul>
-<li>A lookup table is support multiply of 1-hot vector against shared weight matrix, yielding a single column</li>
+<li>A lookup table is a multiply of 1-hot vector against shared weight matrix, yielding a single column</li>
 <li>We have an array of temporal 1-hot vectors to convert</li>
 <li>We can initialize our weights with word2vec model</li>
 </ul></li>
 <li>For very sparse data, or when morphology important, use character level embeddings
 
 <ul>
-<li>Here just use word2vec on char-split data, average together for a word</li>
+<li>Simple idea: use word2vec on char-split data (small context windows), average together for a word</li>
+<li>Note: Better ways exist to combine letters to words (CNN, dos Santos model, BLSTM, Ling model)</li>
 </ul></li>
 </ul>
 
@@ -511,8 +512,8 @@ end</pre>
     local dsz = lookupTable.dsz
     local seq = nn.Sequential()
     seq:add(lookupTable)
-    tconv = nn.TemporalConvolution(dsz, hsz, filtsz)
-    seq:add(tconv)
+    seq:add(nn.TemporalConvolution(dsz, hsz, filtsz))
+    seq:add(nn.ReLU())
     seq:add(nn.Max(2))
     seq:add(nn.Dropout(0.5))
     seq:add(nn.Linear(hsz, nc))
@@ -571,8 +572,8 @@ optmeth(evalf, w, state) -- e.g. optim.adagrad</pre>
 
 <pre >function createModel(dsz, hsz, filtsz, gpu, nc)
     local seq = nn.Sequential()
-    tconv = nn.TemporalConvolution(dsz, hsz, filtsz)
-    seq:add(tconv)
+    seq:add(nn.TemporalConvolution(dsz, hsz, filtsz))
+    seq:add(nn.ReLU())
     seq:add(nn.Max(2))
     seq:add(nn.Dropout(0.5))
     seq:add(nn.Linear(hsz, nc))
