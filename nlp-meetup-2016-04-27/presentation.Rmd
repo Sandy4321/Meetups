@@ -308,7 +308,7 @@ B
   - Kalchbrenner: Trained weights in filter correspond to a linguistic feature detector
     - Learns to recognize a specific class of n-grams
   - Collobert: Tagging a word considers the whole sentence
-    - Produces local features around each word of the sentence, combine into a global feature vector fed to standard affine layers
+    - Produces local features around each word of the sentence, combine into a global feature vector fed to standard layers
 
 ## Application of a 1D Conv Layer
 ```
