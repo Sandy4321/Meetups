@@ -338,13 +338,13 @@ end
 ## Simple Convolution/Max-Over-Time (CMOT) Architecture
 
   - Here is a simple CNN that works very well on short texts
-    - Convolutional layer generating between 60 and 500 feature maps
+    - Convolutional layer generating between 60 and 500 feature maps, followed by non-linearity
     - Max over time pooling generating a hidden output of same size as # feature maps
     - Linear layer to number of classes
     - Softmax output
 
   - Use word2vec embeddings as pretraining for a Lookup Table
-    - A lookup table is support multiply of 1-hot vector against shared weight matrix, yielding a single column
+    - A lookup table is a multiply of 1-hot vector against shared weight matrix, yielding a single column
     - We have an array of temporal 1-hot vectors to convert
     - We can initialize our weights with word2vec model
 
