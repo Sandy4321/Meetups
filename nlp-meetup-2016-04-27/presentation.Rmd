@@ -359,15 +359,15 @@ end
 ## CMOT Model (Torch)
 
 ```
-function createModel(lookupTable, hsz, filtsz, gpu, nc)
+function createModel(lookupTable, cmotsz, filtsz, gpu, nc)
     local dsz = lookupTable.dsz
     local seq = nn.Sequential()
     seq:add(lookupTable)
-    seq:add(nn.TemporalConvolution(dsz, hsz, filtsz))
+    seq:add(nn.TemporalConvolution(dsz, cmotsz, filtsz))
     seq:add(nn.ReLU())
     seq:add(nn.Max(2))
     seq:add(nn.Dropout(0.5))
-    seq:add(nn.Linear(hsz, nc))
+    seq:add(nn.Linear(cmotsz, nc))
     seq:add(nn.LogSoftMax())
     return gpu and seq:cuda() or seq
 end
@@ -420,13 +420,13 @@ optmeth(evalf, w, state) -- e.g. optim.adagrad
 ## CMOT Model with Fixed Weights (Torch)
 
 ```
-function createModel(dsz, hsz, filtsz, gpu, nc)
+function createModel(dsz, cmotsz, filtsz, gpu, nc)
     local seq = nn.Sequential()
-    seq:add(nn.TemporalConvolution(dsz, hsz, filtsz))
+    seq:add(nn.TemporalConvolution(dsz, cmotsz, filtsz))
     seq:add(nn.ReLU())
     seq:add(nn.Max(2))
     seq:add(nn.Dropout(0.5))
-    seq:add(nn.Linear(hsz, nc))
+    seq:add(nn.Linear(cmotsz, nc))
     seq:add(nn.LogSoftMax())
     return gpu and seq:cuda() or seq
 end
