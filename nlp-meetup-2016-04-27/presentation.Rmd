@@ -335,7 +335,7 @@ for k=1,nK do
 end
 ```
 
-## Simple Convolution/Max-Over-Time CMOT Architecture
+## Simple Convolution/Max-Over-Time (CMOT) Architecture
 
   - Here is a simple CNN that works very well on short texts
     - Convolutional layer generating between 60 and 500 feature maps
