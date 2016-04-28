@@ -504,6 +504,7 @@ $$h_t = o_t \cdot tanh(c_t)$$
   - Characters and Morphology important for most tagging tasks
     - Collobert used separate handcrafted features for this
     - dos Santos improves on Collobert model using character compositions learned using CMOT architecture
+    - Ling BLSTM approach is also a strong compositional character-to-word models
   - Would we get an improvement just by averaging char vectors? (obviously wouldnt likely be as good, but quick and dirty)
     - Seems to be a yes, slight improvement on Twitter POS!
     - Keep it simple for these examples
