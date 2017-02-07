@@ -1,0 +1,17 @@
+.letter-parens {
+    font-weight:bold;
+}
+
+img {     
+  max-height: 560px;     
+  max-width: 964px; 
+}
+
+.bad {
+    font-weight:bold;
+    color: red;
+}
+.good {
+    font-weight:bold;
+    color: green;
+}
