@@ -1,12 +1,11 @@
 ---
 title: "Evaluating Goal-oriented End-to-End Dialog Systems"
-author: "Dan Pressel"
+author: "(_Antoine Bordes, Y-Lan Boureau, Jason Weston_)<br> Presentation: _Dan Pressel_"
 date: "February 8th, 2017"
 output:
   slidy_presentation:
     incremental: no
     css: slides.css
-subtitle: _Antoine Bordes, Y-Lan Boureau, Jason Weston_
 ---
 
 ## Dialog Systems at Present
@@ -14,8 +13,7 @@ subtitle: _Antoine Bordes, Y-Lan Boureau, Jason Weston_
   - Most useful dialog systems currently goal-oriented and transactional
     - Limited number of turns
     
-  - Slot-filling for dialog state
-     - Dialog state as set of slots to be filled during dialog
+  - Dialog state as set of slots to be filled during dialog
      
   - Conversation modeling as POMDP (Young '13).
      - Many hand-crafted features for state and action space representation
@@ -349,4 +347,7 @@ Data-Driven Dialogue Systems
     - https://arxiv.org/pdf/1503.08895v5.pdf
   - Building End-To-End Dialogue Systems Using Generative Hierarchical Neural Networks
     - https://arxiv.org/pdf/1507.04808.pdf
+  - POMDP-based Statistical Spoken Dialogue
+Systems: a Review
+    - http://mi.eng.cam.ac.uk/~sjy/papers/ygtw13.pdf
  
