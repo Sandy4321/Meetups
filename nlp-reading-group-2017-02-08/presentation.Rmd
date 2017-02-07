@@ -12,11 +12,9 @@ output:
 
   - Most useful dialog systems currently goal-oriented and transactional
     - Limited number of turns
-    
-  - Dialog state as set of slots to be filled during dialog
-     
-  - Conversation modeling as POMDP (Young '13).
-     - Many hand-crafted features for state and action space representation
+    - Dialog state as set of slots to be filled during dialog (slot-filling)
+    - Conversation modeling as POMDP (Young '13).
+    - Many hand-crafted features for state and action space representation
 
   - Hard to scale to new domains
     - Impossible to encode all features and slots users might refer to in conversation
