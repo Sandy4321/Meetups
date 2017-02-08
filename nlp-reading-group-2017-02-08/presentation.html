@@ -165,7 +165,7 @@ cheap price range      i'm on it
 <ul>
 <li>User asks to update requests between 1-4 times</li>
 <li>Order of updates is random</li>
-<li>Bot asks uses if done with updates</li>
+<li>Bot asks user if done with updates</li>
 <li>Bot isues updated API call</li>
 </ul></li>
 </ul>
@@ -177,7 +177,7 @@ for two people    i'm on it
 5 instead could it be in a expensive price range        sure is there anything else to update
 6 instead could it be with indian cuisine       sure is there anything else to update
 7 actually i would prefer for six people        sure is there anything else to update
-8 instead could it be in madrid sure is there anything else to update
+8 instead could it be in madrid    sure is there anything else to update
 9 no    ok let me look into some options for you
 10 &lt;SILENCE&gt;    api_call indian madrid six expensive
 11 thanks       you're welcome</code></pre>
@@ -220,11 +220,13 @@ with spanish food    i'm on it
 <div id="task-4-providing-extra-information" class="slide section level2">
 <h1>Task 4: Providing extra information</h1>
 <ul>
-<li>Given user request</li>
+<li>Given user request
+<ul>
 <li>Sample a restaurant start dialog as if users agreed already to book there</li>
 <li>Add all KB facts corresponding to dialog</li>
 <li>Users ask for phone #, address, or both with probs 25%, 25%, 50%</li>
 <li>Bot must learn to use KB facts to answer (order non-deterministic)</li>
+</ul></li>
 </ul>
 <pre><code>1 resto_bombay_cheap_french_5stars R_phone resto_bombay_cheap_french_5stars_phone
 2 resto_bombay_cheap_french_5stars R_cuisine french

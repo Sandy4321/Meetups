@@ -113,7 +113,7 @@ cheap price range      i'm on it
   - Start by issuing API call
     - User asks to update requests between 1-4 times
     - Order of updates is random
-    - Bot asks uses if done with updates
+    - Bot asks user if done with updates
     - Bot isues updated API call
 
 ```
@@ -125,7 +125,7 @@ for two people    i'm on it
 5 instead could it be in a expensive price range        sure is there anything else to update
 6 instead could it be with indian cuisine       sure is there anything else to update
 7 actually i would prefer for six people        sure is there anything else to update
-8 instead could it be in madrid sure is there anything else to update
+8 instead could it be in madrid    sure is there anything else to update
 9 no    ok let me look into some options for you
 10 <SILENCE>    api_call indian madrid six expensive
 11 thanks       you're welcome
@@ -167,11 +167,11 @@ with spanish food    i'm on it
 
 ## Task 4: Providing extra information
 
- - Given user request
-   - Sample a restaurant start dialog as if users agreed already to book there
-   - Add all KB facts corresponding to dialog
-   - Users ask for phone #, address, or both with probs 25%, 25%, 50%
-   - Bot must learn to use KB facts to answer (order non-deterministic)
+  - Given user request
+    - Sample a restaurant start dialog as if users agreed already to book there
+    - Add all KB facts corresponding to dialog
+    - Users ask for phone #, address, or both with probs 25%, 25%, 50%
+    - Bot must learn to use KB facts to answer (order non-deterministic)
  
 ```
 1 resto_bombay_cheap_french_5stars R_phone resto_bombay_cheap_french_5stars_phone
