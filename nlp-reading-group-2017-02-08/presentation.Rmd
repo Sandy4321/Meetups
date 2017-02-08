@@ -286,7 +286,7 @@ with spanish food    i'm on it
     - Frequently occur as OOV words
 
   - Both challenge for embedding methods
-    - Embedding to a low dim space makes it hard to differentiate between exact and approx matches
+    - Embedding to low dim space makes it hard to differentiate between exact and approx matches
     - When a new word, not seen in training, no embedding available
     
   - Match Type: Augment vocab with 7 special words
@@ -304,9 +304,9 @@ with spanish food    i'm on it
   - Classical IR method TF-IDF way worse than Nearest Neighbor
     - Match type helps, but not enough
     - In contrast with other non-goal directed convos findings
-    - Conversation moves forward more quickly sharing fewer words per (input, response) pair?
+    - Why? Conversation moves forward more quickly sharing fewer words per (input, response) pair?
 
-  - Supervised embeddings out-perform IR methods in general
+  - Supervised embeddings out-perform classical IR methods in general
     - Learned mappings between words important.  Only 1 task is successful
     - No dialog where goal achieved
     - Can provide correct response for greeting, asking to wait, making API calls, asking if other options necessary.

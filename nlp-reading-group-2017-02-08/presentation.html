@@ -222,7 +222,7 @@ with spanish food    i'm on it
 <ul>
 <li>Given user request
 <ul>
-<li>Sample a restaurant start dialog as if users agreed already to book there</li>
+<li>Sample a restaurant, start dialog as if users agreed already to book there</li>
 <li>Add all KB facts corresponding to dialog</li>
 <li>Users ask for phone #, address, or both with probs 25%, 25%, 50%</li>
 <li>Bot must learn to use KB facts to answer (order non-deterministic)</li>
@@ -365,13 +365,13 @@ with spanish food    i'm on it
 </ul></li>
 <li>Both challenge for embedding methods
 <ul>
-<li>Embedding to a low dim space makes it hard to differentiate between exact and approx matches</li>
+<li>Embedding to low dim space makes it hard to differentiate between exact and approx matches</li>
 <li>When a new word, not seen in training, no embedding available</li>
 </ul></li>
 <li>Match Type: Augment vocab with 7 special words
 <ul>
-<li>One of each KB etype (Cuisne Type, Location, Price Range, Party, Rating, Phone #, Address)</li>
-<li>For each type, add etype if word found 1) as a KB entity 2) in candidate 3) in input or memory</li>
+<li>One of each KB type (cuisine type, location, price, rating, party size, address &amp; phone number)</li>
+<li>For each type, add type if word found 1) as a KB entity 2) in candidate 3) in input or memory</li>
 <li>Allows model to learn to rely on type info using exact matching words cues when embeddings not known</li>
 <li>Require access to a KB with OOV entities</li>
 </ul></li>
@@ -390,9 +390,9 @@ with spanish food    i'm on it
 <ul>
 <li>Match type helps, but not enough</li>
 <li>In contrast with other non-goal directed convos findings</li>
-<li>Conversation moves forward more quickly sharing fewer words per (input, response) pair?</li>
+<li>Why? Conversation moves forward more quickly sharing fewer words per (input, response) pair?</li>
 </ul></li>
-<li>Supervised embeddings out-perform IR methods in general
+<li>Supervised embeddings out-perform classical IR methods in general
 <ul>
 <li>Learned mappings between words important. Only 1 task is successful</li>
 <li>No dialog where goal achieved</li>
