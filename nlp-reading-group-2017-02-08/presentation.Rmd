@@ -329,6 +329,26 @@ with spanish food    i'm on it
 
   - Not easy to build rule systems on real problems, rule baseline beat by MemNNs on T6
 
+## MemNN Task Analysis (Appendix) (1/5)
+
+![Task 1](figure/task1-results.png)
+
+## MemNN Task Analysis (2/5)
+
+![Task 2](figure/task2-results.png)
+
+## MemNN Task Analysis (3/5)
+
+![Task 3](figure/task3-results.png)
+
+## MemNN Task Analysis (4/5)
+
+![Task 4](figure/task4-results.png)
+
+## MemNN Task Analysis (5/5)
+
+![Concierge](figure/task1-results.png)
+
 ## More Background
   - Bordes' NIPS 2016 slides (lots here stolen from there)
     - https://github.com/pmineiro/ldlmd2016/blob/master/abordes-discuss-nips16.pptx?raw=true
