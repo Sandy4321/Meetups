@@ -10,14 +10,14 @@ output:
 
 ## Dialog Systems at Present
 
-  - Most useful dialog systems currently goal-oriented and transactional
+  - Most useful dialog systems currently goal-oriented, transactional
     - Dialog state as set of slots to be filled during dialog (slot-filling)
     - Conversation modeling as POMDP (Young et al., 2013).
     - Many hand-crafted features for state and action space representation
 
   - Hard to scale to new domains
     - Impossible to encode all features and slots users might refer to in conversation
-    - Restricts their usage to narrow domains
+    - Restricts usage to narrow domains
 
 ![POMDP Model](figure/pomdp.png)
 
@@ -67,7 +67,7 @@ output:
   - bAbI dialog sets
     - Restaurant booking domain
     - 5 simulated tasks (T1-T5)
-    - 1 task converted from Dialog State Tracking Challenge 2 (T6)
+    - 1 task converted from Dialog State Tracking Challenge 2 (DSCT2) (T6)
   - Also proprietary concierge data
      - Users make requests through text-based chat interface handled by humans
      - All conversations between native English speakers
@@ -111,7 +111,7 @@ cheap price range      i'm on it
 ## Task 2: Updating API calls
 
   - Start by issuing API call
-    - User ask to update requests between 1-4 times
+    - User asks to update requests between 1-4 times
     - Order of updates is random
     - Bot asks uses if done with updates
     - Bot isues updated API call
@@ -258,7 +258,7 @@ with spanish food    i'm on it
   - Use supervised word embedding models for scoring
      - (conversation history, response) pairs
      - Trained directly to predict response from conversation history
-       - Candidate response y is scored against input x
+       - Candidate response __y__ is scored against input __x__
        - __A__ and __B__ are embedding matrices with size __d x V__ 
       
        $$f(x, y) = (Ax)^{T} By$$
@@ -289,7 +289,7 @@ with spanish food    i'm on it
     - Embedding to a low dim space makes it hard to differentiate between exact and approx matches
     - When a new word, not seen in training, no embedding available
     
-  - Match Type: Augment the vocab with 7 special words
+  - Match Type: Augment vocab with 7 special words
     - One of each KB etype (Cuisne Type, Location, Price Range, Party, Rating, Phone #, Address)
     - For each type, add etype if word found 1) as a KB entity 2) in candidate 3) in input or memory
     - Allows model to learn to rely on type info using exact matching words cues when embeddings not known
@@ -301,16 +301,16 @@ with spanish food    i'm on it
 
 ## Performance by Methods (1/2)
 
-  - Classical IR method TF-IDF is worst, way worse than Nearest Neighbor
+  - Classical IR method TF-IDF way worse than Nearest Neighbor
     - Match type helps, but not enough
     - In contrast with other non-goal directed convos findings
-      - Conversation moves forward more quickly sharing fewer words per __(input, response)__ pair?
+    - Conversation moves forward more quickly sharing fewer words per (input, response) pair?
 
-  - Supervised embeddings outperform IR methods in general
-    - Learned mappings between words is important.  Only 1 task is successful
-    - Other tasks, some correct, but no dialog where goal achieved
-    - Can provide correct response for greeting, asking to wait, making API calls and asking if other options necessary.
-    - Fails to interpret results of API calls to display options, provide info or update the calls with new info
+  - Supervised embeddings out-perform IR methods in general
+    - Learned mappings between words important.  Only 1 task is successful
+    - No dialog where goal achieved
+    - Can provide correct response for greeting, asking to wait, making API calls, asking if other options necessary.
+    - Fails to interpret results of API calls to display options, provide info or update calls with new info
 
 ## Performance by Methods (2/2)
 

@@ -23,7 +23,7 @@
 <div id="dialog-systems-at-present" class="slide section level2">
 <h1>Dialog Systems at Present</h1>
 <ul>
-<li>Most useful dialog systems currently goal-oriented and transactional
+<li>Most useful dialog systems currently goal-oriented, transactional
 <ul>
 <li>Dialog state as set of slots to be filled during dialog (slot-filling)</li>
 <li>Conversation modeling as POMDP (Young et al., 2013).</li>
@@ -32,7 +32,7 @@
 <li>Hard to scale to new domains
 <ul>
 <li>Impossible to encode all features and slots users might refer to in conversation</li>
-<li>Restricts their usage to narrow domains</li>
+<li>Restricts usage to narrow domains</li>
 </ul></li>
 </ul>
 <div class="figure">
@@ -105,7 +105,7 @@
 <ul>
 <li>Restaurant booking domain</li>
 <li>5 simulated tasks (T1-T5)</li>
-<li>1 task converted from Dialog State Tracking Challenge 2 (T6)</li>
+<li>1 task converted from Dialog State Tracking Challenge 2 (DSCT2) (T6)</li>
 </ul></li>
 <li>Also proprietary concierge data
 <ul>
@@ -163,7 +163,7 @@ cheap price range      i'm on it
 <ul>
 <li>Start by issuing API call
 <ul>
-<li>User ask to update requests between 1-4 times</li>
+<li>User asks to update requests between 1-4 times</li>
 <li>Order of updates is random</li>
 <li>Bot asks uses if done with updates</li>
 <li>Bot isues updated API call</li>
@@ -330,7 +330,7 @@ with spanish food    i'm on it
 <ul>
 <li>(conversation history, response) pairs</li>
 <li>Trained directly to predict response from conversation history</li>
-<li>Candidate response y is scored against input x</li>
+<li>Candidate response <strong>y</strong> is scored against input <strong>x</strong></li>
 <li><strong>A</strong> and <strong>B</strong> are embedding matrices with size <strong>d x V</strong></li>
 </ul>
 <span class="math">\[f(x, y) = (Ax)^{T} By\]</span></li>
@@ -366,7 +366,7 @@ with spanish food    i'm on it
 <li>Embedding to a low dim space makes it hard to differentiate between exact and approx matches</li>
 <li>When a new word, not seen in training, no embedding available</li>
 </ul></li>
-<li>Match Type: Augment the vocab with 7 special words
+<li>Match Type: Augment vocab with 7 special words
 <ul>
 <li>One of each KB etype (Cuisne Type, Location, Price Range, Party, Rating, Phone #, Address)</li>
 <li>For each type, add etype if word found 1) as a KB entity 2) in candidate 3) in input or memory</li>
@@ -384,18 +384,18 @@ with spanish food    i'm on it
 <div id="performance-by-methods-12" class="slide section level2">
 <h1>Performance by Methods (1/2)</h1>
 <ul>
-<li>Classical IR method TF-IDF is worst, way worse than Nearest Neighbor
+<li>Classical IR method TF-IDF way worse than Nearest Neighbor
 <ul>
 <li>Match type helps, but not enough</li>
 <li>In contrast with other non-goal directed convos findings</li>
-<li>Conversation moves forward more quickly sharing fewer words per <strong>(input, response)</strong> pair?</li>
+<li>Conversation moves forward more quickly sharing fewer words per (input, response) pair?</li>
 </ul></li>
-<li>Supervised embeddings outperform IR methods in general
+<li>Supervised embeddings out-perform IR methods in general
 <ul>
-<li>Learned mappings between words is important. Only 1 task is successful</li>
-<li>Other tasks, some correct, but no dialog where goal achieved</li>
-<li>Can provide correct response for greeting, asking to wait, making API calls and asking if other options necessary.</li>
-<li>Fails to interpret results of API calls to display options, provide info or update the calls with new info</li>
+<li>Learned mappings between words important. Only 1 task is successful</li>
+<li>No dialog where goal achieved</li>
+<li>Can provide correct response for greeting, asking to wait, making API calls, asking if other options necessary.</li>
+<li>Fails to interpret results of API calls to display options, provide info or update calls with new info</li>
 </ul></li>
 </ul>
 </div>
