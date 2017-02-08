@@ -372,8 +372,8 @@ with spanish food    i'm on it
 <ul>
 <li>One of each KB type (cuisine type, location, price, rating, party size, address &amp; phone number)</li>
 <li>For each type, add type if word found 1) as a KB entity 2) in candidate 3) in input or memory</li>
-<li>Allows model to learn to rely on type info using exact matching words cues when embeddings not known</li>
-<li>Require access to a KB with OOV entities</li>
+<li>Allows model to learn to rely on type info, using exact matching words cues when embeddings not known</li>
+<li>Requires access to a KB with OOV entities</li>
 </ul></li>
 </ul>
 </div>
@@ -404,7 +404,7 @@ with spanish food    i'm on it
 <div id="performance-by-methods-22" class="slide section level2">
 <h1>Performance by Methods (2/2)</h1>
 <ul>
-<li>MemNNs w/o match type features perform better than IR/Embedding methods.
+<li>MemNNs w/o match type features perform better than Classical IR/Embedding methods.
 <ul>
 <li>Per-response accuracy improved, per-dialog accuracy still close to 0 on T3/T4</li>
 <li>Also OOV tasks improved too, but due to better perf. on known words only</li>
