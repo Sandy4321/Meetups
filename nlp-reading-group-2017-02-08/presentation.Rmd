@@ -111,7 +111,7 @@ cheap price range      i'm on it
 ## Task 2: Updating API calls
 
   - Start by issuing API call
-    - User ask to update requests btwn 1-4 times
+    - User ask to update requests between 1-4 times
     - Order of updates is random
     - Bot asks uses if done with updates
     - Bot isues updated API call
@@ -135,7 +135,7 @@ for two people    i'm on it
 
   - Given user request
     - Query KB using call
-    - Add facts resulting from call to dlg history
+    - Add facts resulting from call to dialog history
     - Bot proposes options to users by listing restaurant names sorted rating desc until users accept
     - User has a 25% chance of accepting
     - If user accepts, bot should stop displaying options, otherwise keep proposing
@@ -168,8 +168,8 @@ with spanish food    i'm on it
 ## Task 4: Providing extra information
 
  - Given user request
-   - Sample a restaurant start dlg as if users agreed already to book there
-   - Add all KB facts corresponding to dlg
+   - Sample a restaurant start dialog as if users agreed already to book there
+   - Add all KB facts corresponding to dialog
    - Users ask for phone #, address, or both with probs 25%, 25%, 50%
    - Bot must learn to use KB facts to answer (order non-deterministic)
  
@@ -188,7 +188,7 @@ with spanish food    i'm on it
 ```
 
 ## Task 5: Conducting full dialogs (listing)
-  - Combine tasks 1-4 to generate full dlgs just as in Figure 1
+  - Combine tasks 1-4 to generate full dialogs
 ```
 1 hi    hello what can i help you with today
 2 i'd like to book a table for four in a expensive price range  i'm on it
@@ -218,7 +218,7 @@ with spanish food    i'm on it
 
 ## bAbI dialog evaluation
 
-  - OOV word test:
+  - OOV word test
     - 2nd test set with entities (location, cusine type) not found in training set
   - Next Utterance Classification (NUC)
     - Use prediction instead of Generation
@@ -234,7 +234,7 @@ with spanish food    i'm on it
 <img src="figure/dlg-stats.jpg" width=800>
 </div>
 
-## Baselines
+## Evaluation of Models
 
   - Rule-based
   - Classical IR
@@ -246,7 +246,7 @@ with spanish food    i'm on it
 ## Classical IR Methods
 
   - TF-IDF model
-    - For each possible cand. response, compute matching score between input (last-utterance OR conversation history) & response
+    - For each possible candidate response, compute matching score between input (last-utterance OR conversation history) & response
     - Rank by score (TF-IDF-weighted cosine sim of BoWs)
   - Nearest Neighbor Model
      - Using input (last-utterance), find most similar conversation in training and output the response from that
@@ -290,7 +290,7 @@ with spanish food    i'm on it
     - When a new word, not seen in training, no embedding available
     
   - Match Type: Augment the vocab with 7 special words
-    - One of each KB etype (Cuisne Type, Location, Price Range,Party, Rating, Phone #, Address)
+    - One of each KB etype (Cuisne Type, Location, Price Range, Party, Rating, Phone #, Address)
     - For each type, add etype if word found 1) as a KB entity 2) in candidate 3) in input or memory
     - Allows model to learn to rely on type info using exact matching words cues when embeddings not known
     - Require access to a KB with OOV entities
@@ -304,7 +304,7 @@ with spanish food    i'm on it
   - Classical IR method TF-IDF is worst, way worse than Nearest Neighbor
     - Match type helps, but not enough
     - In contrast with other non-goal directed convos findings
-      - Conversation moves forward more quickly sharing fewer words per (input, response) pair?
+      - Conversation moves forward more quickly sharing fewer words per __(input, response)__ pair?
 
   - Supervised embeddings outperform IR methods in general
     - Learned mappings between words is important.  Only 1 task is successful
@@ -315,7 +315,7 @@ with spanish food    i'm on it
 ## Performance by Methods (2/2)
 
   - MemNNs w/o match type features perform better than IR/Embedding methods. 
-    - Per-response accuracy improved, per-dialog accs is still close to 0 on T3/T4
+    - Per-response accuracy improved, per-dialog accuracy still close to 0 on T3/T4
     - Also OOV tasks improved too, but due to better perf. on known words only
   - Optimal hyper-params on several tasks involve 3 or 4 hops
     - iterative accessing and reasoning over conversation helps
@@ -330,7 +330,7 @@ with spanish food    i'm on it
   - Not easy to build rule systems on real problems, rule baseline beat by MemNNs on T6
 
 ## More Background
-  - Bordes' NIPS 2016 slides (some stuff is verbatime from there)
+  - Bordes' NIPS 2016 slides (lots here stolen from there)
     - https://github.com/pmineiro/ldlmd2016/blob/master/abordes-discuss-nips16.pptx?raw=true
   - bAbI page
     - https://research.fb.com/projects/babi/ 
