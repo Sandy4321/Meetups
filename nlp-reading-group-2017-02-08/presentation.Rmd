@@ -11,15 +11,15 @@ output:
 ## Dialog Systems at Present
 
   - Most useful dialog systems currently goal-oriented and transactional
-    - Limited number of turns
     - Dialog state as set of slots to be filled during dialog (slot-filling)
-    - Conversation modeling as POMDP (Young '13).
+    - Conversation modeling as POMDP (Young et al., 2013).
     - Many hand-crafted features for state and action space representation
 
   - Hard to scale to new domains
     - Impossible to encode all features and slots users might refer to in conversation
     - Restricts their usage to narrow domains
 
+![POMDP Model](figure/pomdp.png)
 
 ## E2E Dialog Systems
 
@@ -330,7 +330,7 @@ with spanish food    i'm on it
   - Not easy to build rule systems on real problems, rule baseline beat by MemNNs on T6
 
 ## More Background
-  - Bordes' NIPS 2016 slides
+  - Bordes' NIPS 2016 slides (some stuff is verbatime from there)
     - https://github.com/pmineiro/ldlmd2016/blob/master/abordes-discuss-nips16.pptx?raw=true
   - bAbI page
     - https://research.fb.com/projects/babi/ 
