@@ -347,7 +347,7 @@ with spanish food    i'm on it
 
 ## MemNN Task Analysis (5/5)
 
-![Concierge](figure/task1-results.png)
+![Concierge](figure/concierge-results.png)
 
 ## More Background
   - Bordes' NIPS 2016 slides (lots here stolen from there)
