@@ -290,8 +290,8 @@ with spanish food    i'm on it
     - When a new word, not seen in training, no embedding available
     
   - Match Type: Augment vocab with 7 special words
-    - One of each KB etype (Cuisne Type, Location, Price Range, Party, Rating, Phone #, Address)
-    - For each type, add etype if word found 1) as a KB entity 2) in candidate 3) in input or memory
+    - One of each KB type (cuisine type, location, price, rating, party size, address & phone number)
+    - For each type, add type if word found 1) as a KB entity 2) in candidate 3) in input or memory
     - Allows model to learn to rely on type info using exact matching words cues when embeddings not known
     - Require access to a KB with OOV entities
 
